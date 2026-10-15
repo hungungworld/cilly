@@ -156,6 +156,26 @@
     }
   }
 
+  // Where a bottle's pump nozzle is right now (CSS px of `canvas`) and which way it points.
+  // Read from two invisible markers on the pump, so tilt, scale and scroll are all accounted for.
+  function nozzleOf(fig, canvas) {
+    const mid = el => { const r = fig.querySelector(el).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+    const c = canvas.getBoundingClientRect();
+    const [nx, ny] = mid(".nozzle"), [ax, ay] = mid(".nozzle-aim");
+    const len = Math.hypot(ax - nx, ay - ny) || 1;
+    return { x: nx - c.left, y: ny - c.top, ux: (ax - nx) / len, uy: (ay - ny) / len };
+  }
+  // A capped bottle can't spray: lift the cap, spritz from the pump, put the cap back on.
+  const CAP_OFF_MS = 280;
+  function uncapAndSpray(fig, fire, hold = 900) {
+    clearTimeout(fig._fire); clearTimeout(fig._close);
+    const wait = fig.classList.contains("is-open") ? 0 : CAP_OFF_MS;
+    fig.classList.add("is-open");
+    fig._fire = setTimeout(fire, wait);
+    fig._close = setTimeout(() => fig.classList.remove("is-open"), wait + hold);
+  }
+  function recap(fig) { clearTimeout(fig._fire); clearTimeout(fig._close); fig.classList.remove("is-open"); }
+
   /* ---------- fit the giant print type to the stage width ---------- */
   const lines = [...document.querySelectorAll(".mega-line")];
   const perPx = el => el.getBoundingClientRect().width / parseFloat(getComputedStyle(el).fontSize);
@@ -257,16 +277,30 @@
     });
     panels.forEach((p, i) => p.classList.toggle("is-on", i === n));
     sceneBtns.forEach((b, i) => i === n ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current"));
-    if (n === 2) setTimeout(() => heroSpray(1), 600);
+    if (prev !== -1) recap(bottle);
+    if (n === 2) setTimeout(() => heroSpray(1), 350);
   }
 
+  // Spray only once the bottle has come to rest in this scene, from wherever its nozzle actually is;
+  // if the visitor scrolls on (or keeps the bottle moving) the spritz is simply skipped.
+  let sprayWait = 0;
   function heroSpray(reach) {
-    const img = bottle.querySelector("img").getBoundingClientRect();
-    const st = heroMist.c.getBoundingClientRect();
-    const x = img.left + img.width * 0.62 - st.left;
-    const y = img.top + img.height * 0.06 - st.top;
-    const a = (-10 + cur.r) * Math.PI / 180, far = Math.min(innerWidth * 0.3, 380) * reach;
-    heroMist.spray(x, y, x + Math.cos(a) * far, y + Math.sin(a) * far, reach);
+    if (reduce) return;
+    const want = scene, t0 = performance.now();
+    cancelAnimationFrame(sprayWait);
+    const settle = () => {
+      if (scene !== want) return;
+      if (animating) {
+        if (performance.now() - t0 < 1500) sprayWait = requestAnimationFrame(settle);
+        return;
+      }
+      uncapAndSpray(bottle, () => {
+        if (scene !== want || animating) return;
+        const n = nozzleOf(bottle, heroMist.c), far = Math.min(innerWidth * 0.3, 380) * reach;
+        heroMist.spray(n.x, n.y, n.x + n.ux * far, n.y + n.uy * far, reach);
+      });
+    };
+    settle();
   }
 
   const mix = (a, b, t) => a + (b - a) * t;
@@ -362,6 +396,7 @@
   resetBtn.addEventListener("click", () => {
     sprays = 0;
     plateMist.p = []; plateMist.beads = []; plateMist.draw();
+    recap(pBottle);
     count.textContent = "";
     sprayBtn.textContent = "칙, 뿌리기";
     resetBtn.hidden = true;
@@ -373,19 +408,17 @@
     sprays++;
     ps.classList.add("is-spraying");
     const fire = () => {
-      const b = pBottle.getBoundingClientRect();
-      const st = ps.getBoundingClientRect();
-      // the cap end of the tilted bottle: centre + half its height along the tilt
-      const r = -38 * Math.PI / 180, half = pBottle.offsetHeight * 0.46;
-      const cx = b.left + b.width / 2 - st.left + Math.sin(r) * half;
-      const cy = b.top + b.height / 2 - st.top - Math.cos(r) * half;
-      plateMist.spray(cx, cy, ps.clientWidth * 0.5, ps.clientHeight * 0.56, 1.2, true);
+      // out of the pump's nozzle, carried as far as the bowl
+      const n = nozzleOf(pBottle, plateMist.c);
+      const reach = Math.hypot(ps.clientWidth * 0.5 - n.x, ps.clientHeight * 0.56 - n.y);
+      plateMist.spray(n.x, n.y, n.x + n.ux * reach, n.y + n.uy * reach, 1.2, true);
       ps.classList.remove("is-fresh"); void ps.offsetWidth; ps.classList.add("is-fresh");
       sprayBtn.textContent = "한 번 더, 칙";
       resetBtn.hidden = false;
       count.textContent = countText(sprays);
     };
-    setTimeout(fire, 380);
+    // the bottle slides in, the cap comes off, then the spritz
+    setTimeout(() => uncapAndSpray(pBottle, fire, 700), 170);
     clearTimeout(ps._hide);
     ps._hide = setTimeout(() => ps.classList.remove("is-spraying"), 1400);
     setTimeout(() => { busy = false; }, 450); // a quick double-tap still counts
