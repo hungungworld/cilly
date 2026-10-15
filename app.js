@@ -181,7 +181,6 @@
   const bottle = document.getElementById("bottle");
   const panels = [...document.querySelectorAll(".panel")];
   const leaves = [...document.querySelectorAll(".leaf")];
-  const heroMist = new Mist(document.getElementById("mist"));
   let scene = -1;
   const sceneBtns = [...document.querySelectorAll("[data-go]")];
   // jump straight to a scene: land a little into its segment so the line is already up
@@ -257,16 +256,6 @@
     });
     panels.forEach((p, i) => p.classList.toggle("is-on", i === n));
     sceneBtns.forEach((b, i) => i === n ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current"));
-    if (n === 2) setTimeout(() => heroSpray(1), 600);
-  }
-
-  function heroSpray(reach) {
-    const img = bottle.querySelector("img").getBoundingClientRect();
-    const st = heroMist.c.getBoundingClientRect();
-    const x = img.left + img.width * 0.62 - st.left;
-    const y = img.top + img.height * 0.06 - st.top;
-    const a = (-10 + cur.r) * Math.PI / 180, far = Math.min(innerWidth * 0.3, 380) * reach;
-    heroMist.spray(x, y, x + Math.cos(a) * far, y + Math.sin(a) * far, reach);
   }
 
   const mix = (a, b, t) => a + (b - a) * t;
@@ -408,13 +397,12 @@
   });
 
   /* ---------- boot ---------- */
-  function resize() { fitType(); measure(); heroMist.size(); plateMist.size(); onScroll(); }
+  function resize() { fitType(); measure(); plateMist.size(); onScroll(); }
   addEventListener("resize", resize);
   addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
   resize();
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
     resize();
-    setTimeout(() => heroSpray(0.8), 1000);
   });
   addEventListener("load", resize);
   if (document.fonts) document.fonts.addEventListener("loadingdone", resize);
