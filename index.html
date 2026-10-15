@@ -6,25 +6,26 @@
 <meta name="theme-color" content="#858f5f">
 <title>CILLY — 막 자른 고수 향, 뿌려 먹는 미스트</title>
 <meta name="description" content="고수 많이 달라고 해도 늘 모자랐던 사람들을 위해. 막 자른 고수 향을 병에 담은, 뿌려 먹는 고수 미스트 CILLY CILANTRO 01.">
-<!-- link previews (KakaoTalk, Instagram DM, Slack, X …): the campaign poster -->
+<!-- link previews (KakaoTalk, Instagram DM, Slack, X …): the poster, laid out 1200x630 so 2:1 / 1.91:1 crops keep the headline -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CILLY">
 <meta property="og:url" content="https://cilly-navy.vercel.app/">
 <meta property="og:title" content="CILLY — 막 자른 고수 향, 뿌려 먹는 미스트">
 <meta property="og:description" content="고수 많이 달라고 해도 늘 모자랐던 사람들을 위해. 막 자른 고수 향을 병에 담은, 뿌려 먹는 고수 미스트 CILLY CILANTRO 01.">
-<meta property="og:image" content="https://cilly-navy.vercel.app/assets/poster-spray-bite-repeat.png">
-<meta property="og:image:type" content="image/png">
-<meta property="og:image:width" content="1122">
-<meta property="og:image:height" content="1402">
+<meta property="og:image" content="https://cilly-navy.vercel.app/assets/og-cilly.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="SPRAY. BITE. REPEAT. 포스터. 콧수염 모델이 타코에 CILLY를 뿌린다">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<link rel="preload" href="assets/bottle.webp" as="image" fetchpriority="high">
-<link rel="stylesheet" href="styles.css?v=16">
-<script src="app.js?v=16" defer></script>
+<link rel="preload" href="assets/bottle-body.webp" as="image" fetchpriority="high">
+<link rel="preload" href="assets/bottle-cap.webp" as="image" fetchpriority="high">
+<link rel="stylesheet" href="styles.css?v=17">
+<script src="app.js?v=17" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -65,7 +66,11 @@
     <div class="mist" aria-hidden="true"><canvas id="mist"></canvas></div>
 
     <figure class="bottle" id="bottle">
-      <img src="assets/bottle.webp" alt="CILLY CILANTRO 01 50 mL. 은색 캡과 종이 라벨의 원통형 유리병" width="993" height="1183" fetchpriority="high">
+      <img src="assets/bottle-body.webp" alt="CILLY CILANTRO 01 50 mL. 은색 캡과 종이 라벨의 원통형 유리병" width="993" height="1183" fetchpriority="high">
+      <!-- a capped bottle can't spray: the cap lifts off the gold pump for each spritz -->
+      <img class="bottle-pump" src="assets/bottle-pump.webp" alt="" width="993" height="1183">
+      <img class="bottle-cap" src="assets/bottle-cap.webp" alt="" width="993" height="1183" fetchpriority="high">
+      <span class="nozzle" aria-hidden="true"></span><span class="nozzle-aim" aria-hidden="true"></span>
     </figure>
 
     <!-- notes, popping out of the bottle like the leaf they came from -->
@@ -185,7 +190,12 @@
   </div>
   <div class="plate-stage" id="plate-stage">
     <img src="assets/pho.webp" alt="고수를 듬뿍 올린 쌀국수" width="736" height="1104" loading="lazy">
-    <img class="plate-bottle" id="plate-bottle" src="assets/bottle.webp" alt="" width="993" height="1183">
+    <div class="plate-bottle" id="plate-bottle" aria-hidden="true">
+      <img src="assets/bottle-body.webp" alt="" width="993" height="1183">
+      <img class="bottle-pump" src="assets/bottle-pump-left.webp" alt="" width="993" height="1183">
+      <img class="bottle-cap" src="assets/bottle-cap.webp" alt="" width="993" height="1183">
+      <span class="nozzle"></span><span class="nozzle-aim"></span>
+    </div>
     <canvas id="plate-mist" aria-hidden="true"></canvas>
   </div>
 </section>
